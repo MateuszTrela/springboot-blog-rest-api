@@ -49,6 +49,8 @@ public class PostServiceImpl implements PostService {
         // convert DTO to entity
         Post post = mapToEntity(postDto);
 
+        System.out.println("IMAGE URL: " + postDto.getImageUrl());
+
         // Retrieve the authenticated user ID from the Authentication object
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();

@@ -3,6 +3,7 @@ package com.springboot.blog.payload;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
@@ -23,6 +24,8 @@ public class PostDto {
     @NotEmpty(message = "Post content cannot be empty")
     @Size(max = 10000, message = "Post content should have up to 10000 characters")
     private String content;
+
+    private String imageUrl;
 
     private String username;
 

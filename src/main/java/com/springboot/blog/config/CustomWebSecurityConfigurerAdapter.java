@@ -75,7 +75,7 @@ public class CustomWebSecurityConfigurerAdapter {
                 .exceptionHandling((exceptionHandling) ->
                         exceptionHandling.authenticationEntryPoint(authenticationEntryPoint)
                 )
-                .authenticationProvider(authenticationProvider())
+
 
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration corsConfig = new CorsConfiguration();
@@ -87,6 +87,8 @@ public class CustomWebSecurityConfigurerAdapter {
 
 
         httpSecurity.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        httpSecurity.authenticationProvider(authenticationProvider());
 
         return httpSecurity.build();
     }

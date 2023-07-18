@@ -11,6 +11,7 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(
         name = "post", uniqueConstraints = {@UniqueConstraint(columnNames = {"title"})}
@@ -32,10 +33,14 @@ public class Post {
     @Column(name = "created_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Date createdDate;
 
+    @Column(name = "imageURL", nullable = false)
+    private String imageURL;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<Comment> comments = new HashSet<>();
 }
