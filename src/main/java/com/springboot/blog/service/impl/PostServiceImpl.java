@@ -4,6 +4,7 @@ import com.springboot.blog.entity.Post;
 import com.springboot.blog.entity.User;
 import com.springboot.blog.exception.BlogAPIException;
 import com.springboot.blog.exception.ResourceNotFoundException;
+import com.springboot.blog.payload.CommentDto;
 import com.springboot.blog.payload.PostDto;
 import com.springboot.blog.payload.PostResponse;
 import com.springboot.blog.repository.PostRepository;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,25 +51,13 @@ public class PostServiceImpl implements PostService {
         // convert DTO to entity
         Post post = mapToEntity(postDto);
 
-        System.out.println("IMAGE URL: " + postDto.getImageUrl());
-
         // Retrieve the authenticated user ID from the Authentication object
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
+        String usernameOrEmail = userDetails.getUsername();
 
-        System.out.println("Username: " + username);
-
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
-        System.out.println(user.toString());
+        User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + usernameOrEmail));
         post.setUser(user);
-
-        System.out.println("ID:"+post.getId());
-        System.out.println("TITLE:"+post.getTitle());
-
-        System.out.println(post);
-
-        System.out.println(post.getUser());
 
         post.setCreatedDate(new Date());
         Post newPost = new Post();
@@ -137,6 +127,18 @@ public class PostServiceImpl implements PostService {
 
         PostDto postDto = mapper.map(post, PostDto.class);
         postDto.setUsername(post.getUser().getUsername());
+
+        if (post.getComments() != null) {
+            Set<CommentDto> commentDtos = post.getComments().stream()
+                    .map(comment -> {
+                        CommentDto commentDto = mapper.map(comment, CommentDto.class);
+                        commentDto.setUsername(comment.getUser().getUsername());
+                        return commentDto;
+                    })
+                    .collect(Collectors.toSet());
+
+            postDto.setComments(commentDtos);
+        }
 
 //        PostDto postDto = new PostDto();
 //        postDto.setId(post.getId());

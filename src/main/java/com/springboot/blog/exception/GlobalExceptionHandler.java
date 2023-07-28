@@ -46,9 +46,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
                                                                WebRequest webRequest){
-
-        System.out.println("!!!handleGlobalException!!!");
-
         ErrorDetails errorDetails = new ErrorDetails(
                 new Date(),
                 exception.getMessage(),

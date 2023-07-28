@@ -2,16 +2,24 @@ package com.springboot.blog.service.impl;
 
 import com.springboot.blog.entity.Comment;
 import com.springboot.blog.entity.Post;
+import com.springboot.blog.entity.User;
 import com.springboot.blog.exception.BlogAPIException;
 import com.springboot.blog.exception.ResourceNotFoundException;
 import com.springboot.blog.payload.CommentDto;
 import com.springboot.blog.repository.CommentRepository;
 import com.springboot.blog.repository.PostRepository;
+import com.springboot.blog.repository.UserRepository;
 import com.springboot.blog.service.CommentService;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +28,9 @@ public class CommentServiceImpl implements CommentService {
 
     private CommentRepository commentRepository;
     private PostRepository postRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private ModelMapper mapper;
 
@@ -36,12 +47,22 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = mapToEntity(commentDto);
 
+        // Retrieve the authenticated user ID from the Authentication object
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String usernameOrEmail = userDetails.getUsername();
+
+        User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + usernameOrEmail));
+        comment.setUser(user);
+
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new ResourceNotFoundException("Post", "id", postId)
         );
 
         // set post to comment entity
         comment.setPost(post);
+
+        comment.setCreatedDate(new Date());
 
         Comment newComment = commentRepository.save(comment);
 
@@ -67,8 +88,8 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto updateComment(Long postId, long commentId, CommentDto commentRequest) {
         Comment comment = checkPostAndComment(postId, commentId);
 
-        comment.setName(commentRequest.getEmail());
-        comment.setEmail(commentRequest.getEmail());
+//        comment.setName(commentRequest.getEmail());
+//        comment.setEmail(commentRequest.getEmail());
         comment.setBody(commentRequest.getBody());
 
         Comment updateComment = commentRepository.save(comment);
@@ -101,7 +122,7 @@ public class CommentServiceImpl implements CommentService {
     private CommentDto mapToDto(Comment comment){
 
         CommentDto commentDto = mapper.map(comment, CommentDto.class);
-
+        commentDto.setUsername(comment.getUser().getUsername());
 //        CommentDto commentDto = new CommentDto();
 //        commentDto.setId(comment.getId());
 //        commentDto.setName(comment.getName());
@@ -113,6 +134,7 @@ public class CommentServiceImpl implements CommentService {
     private Comment mapToEntity(CommentDto commentDto){
 
         Comment comment = mapper.map(commentDto, Comment.class);
+
 
 //        Comment comment = new Comment();
 //        comment.setId(commentDto.getId());

@@ -12,10 +12,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+
 @Entity
-@Table(
-        name = "post", uniqueConstraints = {@UniqueConstraint(columnNames = {"title"})}
-)
+@Table(name = "post")
 public class Post {
     @Id
     @GeneratedValue(
@@ -30,7 +29,8 @@ public class Post {
     private String content;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+//    @Column(name = "created_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_date", nullable = false)
     private Date createdDate;
 
     @Column(name = "imageURL", nullable = false)
